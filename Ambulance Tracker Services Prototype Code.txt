@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMS 112 - Emergency Medical Services</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #e0e0e0; }
+        header { background-color: #1e1e1e; color: #ff5252; padding: 1rem; text-align: center; }
+        nav { background-color: #2c2c2c; display: flex; justify-content: center; padding: 0.5rem; }
+        nav button {
+            background: none; border: none; color: #ff5252;
+            font-weight: bold; margin: 0 1rem; cursor: pointer;
+            font-size: 1rem; transition: color 0.3s;
+        }
+        nav button:hover { color: #ff867c; }
+        .page { display: none; padding: 1rem; }
+        #map { width: 100%; height: 80vh; border: 2px solid #333; border-radius: 8px; }
+        h2 { color: #ff5252; }
+        p { color: #ccc; }
+    </style>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+    <header>
+        <h1>EMS 112 - Emergency Medical Services</h1> 
+    </header>
+
+    <nav>
+        <button onclick="showPage('home')">Home</button>
+        <button onclick="showPage('track')">Track Ambulance</button>
+        <button onclick="showPage('contact')">Contact</button>
+    </nav>
+
+    <!-- Home Page -->
+<div id="home" class="page" style="text-align: center; padding: 40px;">
+    <h1 style="color: #ff5252; font-size: 2.5em; margin-bottom: 10px;">🚑 Ambulance Tracker</h1>
+    <p style="color: #ccc; font-size: 1.2em; margin-bottom: 20px;">
+        Track available ambulances in Jaipur
+    </p>
+
+    <!-- Search Bar for District -->
+    <input 
+        type="text" 
+        id="districtSearch" 
+        placeholder="Enter district name..." 
+        style="padding: 12px; width: 260px; border-radius: 8px; border: none; outline: none; margin-top: 10px; font-size: 1em;"
+    >
+    <button 
+        onclick="searchDistrict()" 
+        style="padding: 12px 20px; border: none; border-radius: 8px; background: #ff5252; color: white; cursor: pointer; font-size: 1em; margin-left: 5px;"
+    >
+        🔍 Search
+    </button>
+
+    <br><br>
+
+    <!-- Ambulance List -->
+    <h2 style="color: #ffb347; margin-bottom: 15px;">Available Ambulances</h2>
+    <div style="max-width: 400px; margin: auto; text-align: left;">
+        <ul style="list-style: none; padding: 0; color: white; font-size: 1.1em;">
+            <li onclick="focusAmbulance(26.9124, 75.7873, 'Ambulance #1 – Jaipur City Centre')" style="cursor: pointer; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                🚑 Ambulance #1 – Jaipur City Centre
+            </li>
+            <li onclick="focusAmbulance(26.9120, 75.7411, 'Ambulance #2 – Ajmer Road')" style="cursor: pointer; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                🚑 Ambulance #2 – Ajmer Road
+            </li>
+            <li onclick="focusAmbulance(26.8524, 75.8011, 'Ambulance #3 – Tonk Road')" style="cursor: pointer; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                🚑 Ambulance #3 – Tonk Road
+            </li>
+            <li onclick="focusAmbulance(26.9860, 75.8500, 'Ambulance #4 – Sikar Road')" style="cursor: pointer; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                🚑 Ambulance #4 – Sikar Road
+            </li>
+            <li onclick="focusAmbulance(26.8500, 75.8160, 'Ambulance #5 – Malviya Nagar')" style="cursor: pointer; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                🚑 Ambulance #5 – Malviya Nagar
+            </li>
+        </ul>
+    </div>
+
+    <br>
+    <button 
+        onclick="showPage('track')" 
+        style="padding: 12px 20px; border: none; border-radius: 8px; background: #4CAF50; color: white; cursor: pointer; font-size: 1em;"
+    >
+        🗺 Go to Map
+    </button>
+</div>
+
+<script>
+    function searchDistrict() {
+        const district = document.getElementById("districtSearch").value.trim();
+        if (!district) {
+            alert("Please enter a district name.");
+            return;
+        }
+
+        fetch(https://nominatim.openstreetmap.org/search?format=json&q=${district}, Rajasthan, India)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const lat = data[0].lat;
+                    const lon = data[0].lon;
+                    showPage('track');
+                    map.setView([lat, lon], 10);
+                } else {
+                    alert("District not found in Rajasthan.");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error searching district.");
+            });
+    }
+
+    function focusAmbulance(lat, lon, name) {
+        showPage('track'); // Go to map page
+        map.setView([lat, lon], 15); // Zoom into ambulance
+        L.popup()
+            .setLatLng([lat, lon])
+            .setContent(<b>${name}</b>)
+            .openOn(map);
+    }
+</script>
+
+<!-- Contact Page -->
+<div id="contact" class="page" style="text-align: center; padding: 40px;">
+    <h1 style="color: #ff5252; font-size: 2.2em; margin-bottom: 10px;">📞 Contact Us</h1>
+    <p style="color: #ccc; font-size: 1.1em; margin-bottom: 25px;">
+        Need help or want to report an emergency? Reach out to us anytime.
+    </p>
+    <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px; display: inline-block;">
+        <p style="color: white; font-size: 1.1em; margin: 5px 0;"><b>Email:</b> support@ambulancetracker.in</p>
+        <p style="color: white; font-size: 1.1em; margin: 5px 0;"><b>Phone:</b> +91 80763 84368 </p>
+        <p style="color: white; font-size: 1.1em; margin: 5px 0;"><b>Address:</b> Jaipur, Rajasthan, India</p>
+    </div>
+</div>
+
+<script>
+    function searchDistrict() {
+        const district = document.getElementById("districtSearch").value.trim();
+        if (!district) {
+            alert("Please enter a district name.");
+            return;
+        }
+
+        // Use Nominatim API to find district location
+        fetch(https://nominatim.openstreetmap.org/search?format=json&q=${district}, Rajasthan, India)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const lat = data[0].lat;
+                    const lon = data[0].lon;
+                    showPage('track');
+                    map.setView([lat, lon], 10);
+                } else {
+                    alert("District not found in Rajasthan.");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error searching district.");
+            });
+    }
+</script>
+
+    <!-- Track Ambulance Page -->
+    <div id="track" class="page">
+        <div id="map"></div>
+    </div>
+
+    <!-- Contact Page -->
+    <div id="contact" class="page">
+        <h2>Contact Us</h2>
+        <p><b>Emergency Helpline:</b> 112</p>
+        <p><b>Email:</b> support@ems112.com</p>
+        <p><b>Address:</b> Jaipur, Rajasthan, India</p>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Function to show pages
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.style.display = 'none');
+            document.getElementById(pageId).style.display = 'block';
+            if (pageId === 'track') {
+                map.invalidateSize(); // Fix map display after showing
+            }
+        }
+
+        // Default page
+        showPage('home');
+
+        // Jaipur coordinates
+        const jaipurCenter = [26.9124, 75.7873];
+
+        // Initialize map (dark tiles)
+        const map = L.map('map').setView(jaipurCenter, 8);
+
+     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+    maxZoom: 19
+}).addTo(map);
+
+        // Draw 200 km radius
+        L.circle(jaipurCenter, {
+            color: '#ff5252', fillColor: '#ff5252', fillOpacity: 0.1, radius: 200000
+        }).addTo(map).bindPopup("200 km Coverage Area");
+
+        // Ambulance icon
+        const ambulanceIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/2967/2967559.png',
+            iconSize: [40, 40], iconAnchor: [20, 40], popupAnchor: [0, -35]
+        });
+
+        // Ambulance locations
+        const ambulances = [
+            { name: "Ambulance 1", coords: [26.915, 75.81] },
+            { name: "Ambulance 2", coords: [27.15, 75.5] },
+            { name: "Ambulance 3", coords: [26.75, 75.9] },
+            { name: "Ambulance 4", coords: [26.55, 76.1] },
+            { name: "Ambulance 5", coords: [27.0, 76.2] },
+            { name: "Ambulance 6", coords: [26.8, 75.65] },
+            { name: "Ambulance 7", coords: [27.05, 75.85] },
+            { name: "Ambulance 8", coords: [26.7, 76.0] },
+            { name: "Ambulance 9", coords: [27.2, 75.6] },
+            { name: "Ambulance 10", coords: [26.6, 75.95] },
+            { name: "Ambulance 11", coords: [27.1, 76.05] },
+            { name: "Ambulance 12", coords: [26.85, 75.75] },
+            { name: "Ambulance 13", coords: [26.84292, 75.56522 ] }
+        ];
+
+        // Add markers
+        ambulances.forEach(amb => {
+            L.marker(amb.coords, { icon: ambulanceIcon })
+                .addTo(map)
+                .bindPopup(<b>${amb.name}</b><br>Available);
+        });
+    </script>
+</body>
+</html>
